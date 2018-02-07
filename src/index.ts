@@ -26,17 +26,13 @@ export type Session = {
 
 export async function getSessionToken(credentials: Credentials): Promise<Session> {
   const { domain, email, secretKey, masterPassword } = credentials;
+  const token = await exec(`signin ${domain} ${email} ${secretKey} ${masterPassword} --output=raw`, { raw: true });
 
-  try {
-    const token = await exec(`signin ${domain} ${email} ${secretKey} ${masterPassword} --output=raw`, { raw: true });
-
-    return {
-      token,
-      expiresAt: generateTokenExpirationDate(),
-    }
-  } catch (e) {
-    return e;
+  return {
+    token,
+    expiresAt: generateTokenExpirationDate(),
   }
+
 }
 
 export function isValidSession(session: Session): boolean {
