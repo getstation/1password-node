@@ -267,10 +267,10 @@ function mapper(item: any, template: Template): any {
     case '001':
       if (item.details && item.details.fields) {
         const passwordFieldFromName = item.details.fields.find(function(field: any) {
-          return field.name.toLowerCase() === 'password' && field.type ===  'P';
+          return field.name && field.name.toLowerCase() === 'password' && field.type ===  'P';
         });
         const passwordFieldFromDesignation = item.details.fields.find(function(field: any) {
-          return field.designation.toLowerCase() === 'password' && field.type === 'P';
+          return field.designation && field.designation.toLowerCase() === 'password' && field.type === 'P';
         });
 
         const password = passwordFieldFromName ?
