@@ -21,6 +21,7 @@ export type Credentials = {
 
 export type Session = {
   token: string,
+  email: string,
   expiresAt: Date,
 }
 
@@ -30,6 +31,7 @@ export async function getSessionToken(credentials: Credentials): Promise<Session
 
   return {
     token,
+    email,
     expiresAt: generateTokenExpirationDate(),
   }
 
@@ -152,11 +154,19 @@ export async function getVaults(session: Session): Promise<Vault[]> {
 export const getVault = memoize(async function(session: Session, id: string): Promise<VaultDetails> {
   const vault = await exec(`get vault ${id}`, { session });
   const account = await getAccount(session);
-
   const { uuid, name, desc } = vault;
-  const avatarUrl = vault.avatar.length > 0 ?
-    `${account.baseAvatarURL}/${vault.avatar}` :
-    'https://a.1password.com/app/images/avatar-vault-default.png';
+
+  let avatarUrl;
+
+  if (vault.type === 'P') {
+    const user = await getUser(session, session.email);
+    avatarUrl = user.avatarUrl;
+  } else {
+    avatarUrl = vault.avatar.length > 0 ?
+      `${account.baseAvatarURL}/${vault.avatar}` :
+      'https://a.1password.com/app/images/avatar-vault-default.png';
+  }
+
 
   return {
     uuid,
