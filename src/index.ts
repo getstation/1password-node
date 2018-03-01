@@ -4,6 +4,12 @@ import * as path from 'path';
 import * as memoize from 'memoizee';
 import { ForkOptions } from "child_process";
 
+// Memoization
+
+const memoizationConfiguration = {
+  maxAge: 6500,
+};
+
 // Error
 
 export class OnePasswordNodeError extends Error {}
@@ -61,7 +67,7 @@ export const getAccount = memoize(async function(session: Session): Promise<Acco
     baseAvatarURL: `${account.baseAvatarURL}${account.uuid}`,
     createdAt: new Date(account.createdAt),
   }
-});
+}, memoizationConfiguration);
 
 // User
 
@@ -96,7 +102,7 @@ export const getUsers = memoize(async function(session: Session): Promise<User[]
       avatarUrl,
     }
   });
-});
+}, memoizationConfiguration);
 
 export const getUser = memoize(async function(session: Session, id: string): Promise<UserDetails> {
   const user = await exec(`get user ${id}`, { session });
@@ -116,7 +122,7 @@ export const getUser = memoize(async function(session: Session, id: string): Pro
     updatedAt: new Date(updatedAt),
     lastAuthAt: new Date(lastAuthAt),
   }
-});
+}, memoizationConfiguration);
 
 function userAvatarUrl(user: any, account: Account): string {
   return user.avatar.length > 0 ?
@@ -133,7 +139,7 @@ export type Template = {
 
 export const getTemplates = memoize(async function(session: Session): Promise<Template[]> {
   return await exec('list templates', { session });
-});
+}, memoizationConfiguration);
 
 // Vault
 
@@ -174,7 +180,7 @@ export const getVault = memoize(async function(session: Session, id: string): Pr
     description: desc,
     avatarUrl,
   }
-});
+}, memoizationConfiguration);
 
 // Item
 
@@ -203,7 +209,7 @@ const defaultItemsOptions = {
   vault: undefined,
   template: undefined,
   query: undefined,
-  fuse: {}
+  fuse: {},
 };
 
 export const getItems = memoize(async function(session: Session,
@@ -230,13 +236,13 @@ export const getItems = memoize(async function(session: Session,
   const filteredAccounts = new Fuse(items, fuseOptions).search(options.query);
 
   return await trim(session, filteredAccounts, options.template) as Item[];
-});
+}, memoizationConfiguration);
 
 export const getItem = memoize(async function(session: Session, id: string): Promise<Item> {
   const item = await exec(`get item ${id}`, { session });
 
   return await trim(session, item) as Item;
-});
+}, memoizationConfiguration);
 
 async function trim(session: Session, data: Array<any> | any, template: Template | undefined = undefined): Promise<Item[] | Item> {
   const format = async function(item: any) {
