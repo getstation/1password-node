@@ -172,8 +172,7 @@ export const getVault = memoize(async function(session: Session, id: string): Pr
       `${account.baseAvatarURL}/${vault.avatar}` :
       'https://a.1password.com/app/images/avatar-vault-default.png';
   }
-
-
+  
   return {
     uuid,
     name,
@@ -343,7 +342,7 @@ async function exec(command: string, options: ExecOptions = {}): Promise<any> {
       .split('(ERROR)')[1]
       .trim();
 
-    if (error.includes('You are not currently signed in.') || '401: Authentication required') {
+    if (error.includes('You are not currently signed in.') || error.includes('401: Authentication required')) {
       throw new SessionError('Session invalid');
     } else {
       throw new QueryError(error);
@@ -387,6 +386,5 @@ function generateTokenExpirationDate(): Date {
 const isDarwin = process.platform === 'darwin';
 
 const opPath = isDarwin ?
-  path.join(__dirname, '../ext/op-darwin-21001') :
-  path.join(__dirname, '../ext/op-win-21001.exe');
-
+  path.join(__dirname, '../ext/op-darwin-30001') :
+  path.join(__dirname, '../ext/op-win-30001.exe');

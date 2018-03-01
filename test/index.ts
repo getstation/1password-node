@@ -5,7 +5,7 @@ import {
   getUsers, getVault, getVaults, isValidSession,
 } from '../src';
 
-async function test () {
+async function test() {
   const credentials = await inquirer
     .prompt([
       {
@@ -28,7 +28,7 @@ async function test () {
         message: 'Enter master password',
         name: 'masterPassword',
         mask: '*',
-      }
+      },
     ]);
 
   const session = await getSessionToken(credentials);
