@@ -172,7 +172,7 @@ export const getVault = memoize(async function(session: Session, id: string): Pr
       `${account.baseAvatarURL}/${vault.avatar}` :
       'https://a.1password.com/app/images/avatar-vault-default.png';
   }
-  
+
   return {
     uuid,
     name,
@@ -338,12 +338,10 @@ async function exec(command: string, options: ExecOptions = {}): Promise<any> {
 
   if (result.startsWith('[bin-error]')) {
     const error = result
-      .split('---')[1]
-      .split('(ERROR)')[1]
-      .trim();
+      .split('---')[1];
 
     if (error.includes('You are not currently signed in.') || error.includes('401: Authentication required')) {
-      throw new SessionError('Session invalid');
+      throw new SessionError(error);
     } else {
       throw new QueryError(error);
     }
