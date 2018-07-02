@@ -167,10 +167,12 @@ export const getVault = memoize(async function(session: Session, id: string): Pr
   if (vault.type === 'P') {
     const user = await getUser(session, session.email);
     avatarUrl = user.avatarUrl;
+  } else if (vault.type === 'E') {
+    avatarUrl = account.avatarUrl;
+  } else if (vault.avatar) {
+    avatarUrl = `${account.baseAvatarURL}/${vault.avatar}`;
   } else {
-    avatarUrl = vault.avatar.length > 0 ?
-      `${account.baseAvatarURL}/${vault.avatar}` :
-      'https://a.1password.com/app/images/avatar-vault-default.png';
+    avatarUrl = 'https://a.1password.com/app/images/avatar-vault-default.png';
   }
 
   return {
@@ -384,5 +386,5 @@ function generateTokenExpirationDate(): Date {
 const isDarwin = process.platform === 'darwin';
 
 const opPath = isDarwin ?
-  path.join(__dirname, '../ext/op-darwin-30001') :
-  path.join(__dirname, '../ext/op-win-30001.exe');
+  path.join(__dirname, '../ext/op-darwin-41001') :
+  path.join(__dirname, '../ext/op-win-41001.exe');
