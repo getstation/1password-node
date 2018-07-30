@@ -1,20 +1,16 @@
-import * as Fuse from 'fuse.js';
 import * as child_process from 'child_process';
 import * as path from 'path';
+import { ForkOptions } from 'child_process';
+import * as Fuse from 'fuse.js';
 import * as memoize from 'memoizee';
-import { ForkOptions } from "child_process";
+import { QueryError, SessionError } from './errors';
+import { getExecutableName } from './table';
 
 // Memoization
 
 const memoizationConfiguration = {
   maxAge: 6500,
 };
-
-// Error
-
-export class OnePasswordNodeError extends Error {}
-export class SessionError extends OnePasswordNodeError {}
-export class QueryError extends OnePasswordNodeError {}
 
 // Authentication
 
@@ -383,8 +379,4 @@ function generateTokenExpirationDate(): Date {
   return new Date(now.setMinutes(now.getMinutes() + 29));
 }
 
-const isDarwin = process.platform === 'darwin';
-
-const opPath = isDarwin ?
-  path.join(__dirname, '../ext/op-darwin-41001') :
-  path.join(__dirname, '../ext/op-win-41001.exe');
+const opPath = path.resolve(__dirname, '..', 'ext', getExecutableName(process.platform));
