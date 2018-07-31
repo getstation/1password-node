@@ -1,6 +1,6 @@
 {
   "name": "1password-node",
-  "version": "2.0.7",
+  "version": "2.1.0",
   "description": "",
   "keywords": [],
   "main": "dist/index.js",
@@ -11,7 +11,7 @@
     "build": "tsc",
     "prepare": "npm run build"
   },
-  "author": "Hugo Mano <hugo@hugomano.com>",
+  "author": "Hugo Mano <hugo@getstation.com>",
   "license": "MIT",
   "dependencies": {
     "bluebird": "^3.5.1",
