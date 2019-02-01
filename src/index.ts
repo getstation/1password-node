@@ -29,7 +29,7 @@ export type Session = {
 
 export async function getSessionToken(credentials: Credentials): Promise<Session> {
   const { domain, email, secretKey, masterPassword } = credentials;
-  const token = await exec(`signin ${domain} ${email} ${secretKey} ${masterPassword} --output=raw`, { raw: true });
+  const token = await exec(`signin ${domain} ${email} ${secretKey} --output=raw`, { before: `echo ${masterPassword}`, raw: true });
 
   return {
     token,
@@ -53,7 +53,7 @@ export type Account = {
   createdAt: Date,
 }
 
-export const getAccount = memoize(async function(session: Session): Promise<Account> {
+export const getAccount = memoize(async function (session: Session): Promise<Account> {
   const account = await exec('get account', { session });
 
   return {
@@ -82,11 +82,11 @@ export type UserDetails = User & {
   lastAuthAt: Date,
 }
 
-export const getUsers = memoize(async function(session: Session): Promise<User[]> {
+export const getUsers = memoize(async function (session: Session): Promise<User[]> {
   const users = await exec('list users', { session });
   const account = await getAccount(session);
 
-  return users.map(function(user: User): User {
+  return users.map(function (user: User): User {
     const { uuid, firstName, lastName, email } = user;
     const avatarUrl = userAvatarUrl(user, account);
 
@@ -100,7 +100,7 @@ export const getUsers = memoize(async function(session: Session): Promise<User[]
   });
 }, memoizationConfiguration);
 
-export const getUser = memoize(async function(session: Session, id: string): Promise<UserDetails> {
+export const getUser = memoize(async function (session: Session, id: string): Promise<UserDetails> {
   const user = await exec(`get user ${id}`, { session });
   const account = await getAccount(session);
 
@@ -133,7 +133,7 @@ export type Template = {
   name: string,
 }
 
-export const getTemplates = memoize(async function(session: Session): Promise<Template[]> {
+export const getTemplates = memoize(async function (session: Session): Promise<Template[]> {
   return await exec('list templates', { session });
 }, memoizationConfiguration);
 
@@ -153,7 +153,7 @@ export async function getVaults(session: Session): Promise<Vault[]> {
   return await exec('list vaults', { session });
 }
 
-export const getVault = memoize(async function(session: Session, id: string): Promise<VaultDetails> {
+export const getVault = memoize(async function (session: Session, id: string): Promise<VaultDetails> {
   const vault = await exec(`get vault ${id}`, { session });
   const account = await getAccount(session);
   const { uuid, name, desc } = vault;
@@ -209,8 +209,8 @@ const defaultItemsOptions = {
   fuse: {},
 };
 
-export const getItems = memoize(async function(session: Session,
-                                               options: ItemsOptions = defaultItemsOptions): Promise<Item[]> {
+export const getItems = memoize(async function (session: Session,
+  options: ItemsOptions = defaultItemsOptions): Promise<Item[]> {
   const items = await exec('list items', { session, vault: options.vault });
 
   if (!options.query) return await trim(session, items, options.template) as Item[];
@@ -228,25 +228,26 @@ export const getItems = memoize(async function(session: Session,
       "overview.ainfo",
       "overview.title",
       "overview.url",
-    ]}, options.fuse);
+    ]
+  }, options.fuse);
 
   const filteredAccounts = new Fuse(items, fuseOptions).search(options.query);
 
   return await trim(session, filteredAccounts, options.template) as Item[];
 }, memoizationConfiguration);
 
-export const getItem = memoize(async function(session: Session, id: string): Promise<Item> {
+export const getItem = memoize(async function (session: Session, id: string): Promise<Item> {
   const item = await exec(`get item ${id}`, { session });
 
   return await trim(session, item) as Item;
 }, memoizationConfiguration);
 
 async function trim(session: Session, data: Array<any> | any, template: Template | undefined = undefined): Promise<Item[] | Item> {
-  const format = async function(item: any) {
+  const format = async function (item: any) {
     const { uuid, vaultUuid, templateUuid, overview: { title } } = item;
     const vault = await getVault(session, vaultUuid);
     const templates = await getTemplates(session);
-    const template = templates.find(function(template: Template) {
+    const template = templates.find(function (template: Template) {
       return template.uuid === templateUuid;
     }) as Template;
 
@@ -261,7 +262,7 @@ async function trim(session: Session, data: Array<any> | any, template: Template
 
   if (Array.isArray(data)) {
     return await Promise.all(data
-      .filter(function(item: any) {
+      .filter(function (item: any) {
         if (template) {
           return item.template.uuid === template.uuid;
         } else {
@@ -275,19 +276,19 @@ async function trim(session: Session, data: Array<any> | any, template: Template
 }
 
 function mapper(item: any, template: Template): any {
-  switch(template.uuid) {
+  switch (template.uuid) {
     // Login
     case '001':
       if (item.details && item.details.fields) {
-        const passwordFieldFromName = item.details.fields.find(function(field: any) {
-          return field.name && field.name.toLowerCase() === 'password' && field.type ===  'P';
+        const passwordFieldFromName = item.details.fields.find(function (field: any) {
+          return field.name && field.name.toLowerCase() === 'password' && field.type === 'P';
         });
-        const passwordFieldFromDesignation = item.details.fields.find(function(field: any) {
+        const passwordFieldFromDesignation = item.details.fields.find(function (field: any) {
           return field.designation && field.designation.toLowerCase() === 'password' && field.type === 'P';
         });
 
         const password = passwordFieldFromName ?
-          passwordFieldFromName.value : (passwordFieldFromDesignation ? passwordFieldFromDesignation.value : undefined );
+          passwordFieldFromName.value : (passwordFieldFromDesignation ? passwordFieldFromDesignation.value : undefined);
 
         return {
           username: item.overview.ainfo,
@@ -298,7 +299,7 @@ function mapper(item: any, template: Template): any {
           username: item.overview.ainfo,
         };
       }
-    default: {}
+    default: { }
   }
 }
 
@@ -308,11 +309,12 @@ type ExecOptions = {
   session?: Session,
   vault?: Vault,
   raw?: boolean,
+  before?: string,
 }
 
 async function exec(command: string, options: ExecOptions = {}): Promise<any> {
-  const defaultOptions: ExecOptions = { session: undefined, vault: undefined, raw: false };
-  const { session, vault, raw } = Object.assign(defaultOptions, options);
+  const defaultOptions: ExecOptions = { session: undefined, vault: undefined, raw: false, before: '' };
+  const { session, vault, raw, before } = Object.assign(defaultOptions, options);
 
   let args = command.split(' ');
 
@@ -326,7 +328,7 @@ async function exec(command: string, options: ExecOptions = {}): Promise<any> {
 
   if (vault) args.push(`--vault=${vault.name}`);
 
-  const result = await forkBin(`${__dirname}/bin`, [opPath, args], { silent: true }) as string;
+  const result = await forkBin(`${__dirname}/bin`, [opPath, args, before], { silent: true }) as string;
 
   // Error handling
 
@@ -334,9 +336,9 @@ async function exec(command: string, options: ExecOptions = {}): Promise<any> {
   // [LOG] XXXX/XX/XX XX:XX:XX (ERROR) You are not currently signed in. Please run `op signin --help` for instructions
   // [LOG] XXXX/XX/XX XX:XX:XX (ERROR) 401: Authentication required.
 
-  if (result.startsWith('[bin-error]')) {
+  if (result.includes('[bin-error]')) {
     const error = result
-      .split('---')[1];
+      .split('[bin-error]---')[1];
 
     if (error.includes('You are not currently signed in.') || error.includes('401: Authentication required')) {
       throw new SessionError(error);
