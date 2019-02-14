@@ -4,12 +4,15 @@ const [_program, _path, binaryPath, args, before] = process.argv;
 
 let response;
 
+const realBinaryPath = binaryPath.includes('app.asar/') ?
+  binaryPath.replace('app.asar/', 'app.asar.unpacked/') : binaryPath;
+
 try {
   const shellArgs = args.split(',').join(' ');
 
   const command = Boolean(before) ?
-    `${before} | ${binaryPath} ${shellArgs}` :
-    `${binaryPath} ${shellArgs}`;
+    `${before} | ${realBinaryPath} ${shellArgs}` :
+    `${realBinaryPath} ${shellArgs}`;
 
   response = execSync(command)
     .toString()
