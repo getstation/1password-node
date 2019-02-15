@@ -383,5 +383,5 @@ function generateTokenExpirationDate(): Date {
 
 const resolvedOpPath = path.resolve(__dirname, '..', 'ext', getExecutableName(process.platform));
 
-const opPath = resolvedOpPath.includes('app.asar/') ?
-  resolvedOpPath.replace('app.asar/', 'app.asar.unpacked/') : resolvedOpPath;
+const opPath = resolvedOpPath.includes('app.asar') ?
+  resolvedOpPath.replace('app.asar', 'app.asar.unpacked') : resolvedOpPath;
