@@ -27,9 +27,13 @@ export type Session = {
   expiresAt: Date,
 }
 
+function escapeShellArg(arg: string) {
+  return `'${arg.replace(/'/g, `'\\''`)}'`;
+}
+
 export async function getSessionToken(credentials: Credentials): Promise<Session> {
   const { domain, email, secretKey, masterPassword } = credentials;
-  const token = await exec(`signin ${domain} ${email} ${secretKey} --output=raw`, { before: `echo ${masterPassword}`, raw: true });
+  const token = await exec(`signin ${domain} ${email} ${secretKey} --output=raw`, { before: `echo ${escapeShellArg(masterPassword)}`, raw: true });
 
   return {
     token,
