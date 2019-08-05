@@ -1,9 +1,9 @@
 import { PlatformNotSupportedError } from './errors';
 
 const table: Record<string, string> = {
-  darwin: 'op-darwin-55001',
-  linux: 'op-linux-x64-55001',
-  win32: 'op-win-55001.exe',
+  darwin: 'op-darwin-57001',
+  linux: 'op-linux-x64-57001',
+  win32: 'op-win-57001.exe',
 };
 
 export function getExecutableName(platform: string) {
