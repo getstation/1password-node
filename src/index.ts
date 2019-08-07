@@ -1,10 +1,17 @@
 import * as child_process from 'child_process';
-import * as path from 'path';
 import { ForkOptions } from 'child_process';
 import * as Fuse from 'fuse.js';
 import * as memoize from 'memoizee';
 import { QueryError, SessionError } from './errors';
-import { getExecutableName } from './table';
+import {
+  downloadBinary,
+  isBinaryDownloaded,
+  getExecutablePath,
+} from './exectubable-downloader';
+
+// CLI Version
+
+const opCliVersion = '0.5.7';
 
 // Memoization
 
@@ -25,20 +32,35 @@ export type Session = {
   token: string,
   email: string,
   expiresAt: Date,
+  binaryFolder: string,
 }
 
 function escapeShellArg(arg: string) {
   return `'${arg.replace(/'/g, `'\\''`)}'`;
 }
 
-export async function getSessionToken(credentials: Credentials): Promise<Session> {
+export const setupOpBinary = async (
+  binaryFolder: string,
+): Promise<void> => {
+  const alreadyDownloaded = await isBinaryDownloaded(binaryFolder, opCliVersion, process.platform);
+
+  if (!alreadyDownloaded) {
+    await downloadBinary(binaryFolder, opCliVersion, process.platform)
+  }
+}
+
+export async function getSessionToken(
+  credentials: Credentials,
+  binaryFolder: string
+): Promise<Session> {
   const { domain, email, secretKey, masterPassword } = credentials;
-  const token = await exec(`signin ${domain} ${email} ${secretKey} --output=raw`, { before: `echo ${escapeShellArg(masterPassword)}`, raw: true });
+  const token = await exec(`signin ${domain} ${email} ${secretKey} --output=raw`, { before: `echo ${escapeShellArg(masterPassword)}`, raw: true, binaryFolder });
 
   return {
     token,
     email,
     expiresAt: generateTokenExpirationDate(),
+    binaryFolder,
   }
 
 }
@@ -314,11 +336,22 @@ type ExecOptions = {
   vault?: Vault,
   raw?: boolean,
   before?: string,
+  binaryFolder?: string,
 }
 
-async function exec(command: string, options: ExecOptions = {}): Promise<any> {
-  const defaultOptions: ExecOptions = { session: undefined, vault: undefined, raw: false, before: '' };
-  const { session, vault, raw, before } = Object.assign(defaultOptions, options);
+async function exec(
+  command: string,
+  options: ExecOptions = {}
+): Promise<any> {
+  const defaultOptions: ExecOptions = {
+    session: undefined,
+    vault: undefined,
+    raw: false,
+    before: '',
+    binaryFolder: undefined,
+  };
+
+  const { session, vault, raw, before, binaryFolder } = Object.assign(defaultOptions, options);
 
   let args = command.split(' ');
 
@@ -331,6 +364,16 @@ async function exec(command: string, options: ExecOptions = {}): Promise<any> {
   }
 
   if (vault) args.push(`--vault=${vault.name}`);
+
+  const definedBinaryFolder = binaryFolder || (session && session.binaryFolder);
+
+  const binaryDownloaded = await isBinaryDownloaded(definedBinaryFolder!, opCliVersion, process.platform);
+
+  if (!binaryDownloaded) {
+    await downloadBinary(definedBinaryFolder!, opCliVersion, process.platform);
+  }
+
+  const opPath = getExecutablePath(definedBinaryFolder!, opCliVersion, process.platform);
 
   const result = await forkBin(`${__dirname}/bin`, [opPath, args, before], { silent: true }) as string;
 
@@ -384,8 +427,3 @@ function generateTokenExpirationDate(): Date {
   const now = new Date();
   return new Date(now.setMinutes(now.getMinutes() + 29));
 }
-
-const resolvedOpPath = path.resolve(__dirname, '..', 'ext', getExecutableName(process.platform));
-
-const opPath = resolvedOpPath.includes('app.asar') ?
-  resolvedOpPath.replace('app.asar', 'app.asar.unpacked') : resolvedOpPath;
