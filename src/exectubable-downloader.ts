@@ -9,12 +9,12 @@ import {
   unlink,
   access,
 } from 'fs';
+import { ensureDir } from 'fs-extra';
 import { join } from 'path';
 import { promisify } from 'util';
 
 import { PlatformNotSupportedError } from './errors';
 
-const createDirectory = promisify(mkdir);
 const makeExecutable = promisify(chmod);
 const removeFile = promisify(unlink);
 
@@ -58,6 +58,9 @@ export const downloadBinary = async (
     const zipDestination = `${destination}-${version}.zip`;
     const folderDestination = `${destination}-${version}`;
     const executablePath = getExecutablePath(destination, version, platform);
+
+    await ensureDir(folderDestination);
+
     const file = createWriteStream(zipDestination);
 
     await removeDir(folderDestination, { force: true });
@@ -70,8 +73,6 @@ export const downloadBinary = async (
 
     file.on('finish', async () => {
       file.close();
-
-      await createDirectory(folderDestination);
 
       const zipFile = new Zip(zipDestination);
       zipFile.extractAllTo(folderDestination);
