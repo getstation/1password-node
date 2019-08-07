@@ -1,6 +1,6 @@
 import * as Zip from 'adm-zip';
 import * as removeDir from 'del';
-import { get } from 'http';
+import { get } from 'https';
 import {
   constants,
   createWriteStream,
