@@ -1,6 +1,6 @@
 {
   "name": "1password-node",
-  "version": "3.0.0-rc.2",
+  "version": "3.0.0-rc.3",
   "description": "",
   "keywords": [],
   "main": "dist/index.js",
@@ -29,6 +29,6 @@
     "inquirer": "^5.1.0",
     "ts-node": "^4.1.0",
     "tslint-config-station": "^0.6.0",
-    "typescript": "^2.7.1"
+    "typescript": "^3.5.3"
   }
 }

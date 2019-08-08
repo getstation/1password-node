@@ -46,9 +46,6 @@ const getDistributionPlatform = (platform: NodeJS.Platform) => {
 const urlFor = (version: string, platform: string) =>
   `https://cache.agilebits.com/dist/1P/op/pkg/v${version}/op_${platform}_v${version}.zip`;
 
-// const urlFor = (version: string, platform: string) =>
-//   `http://localhost:8000/op_${platform}_v${version}.zip`;
-
 export const downloadBinary = async (
   destination: string,
   version: string,

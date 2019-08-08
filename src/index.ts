@@ -7,7 +7,7 @@ import {
   downloadBinary,
   isBinaryDownloaded,
   getExecutablePath,
-} from './exectubable-downloader';
+} from './executable-downloader';
 
 // CLI Version
 
