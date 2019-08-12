@@ -39,6 +39,12 @@ function escapeShellArg(arg: string) {
   return `'${arg.replace(/'/g, `'\\''`)}'`;
 }
 
+function echo(arg: string) {
+  return process.platform === 'win32' ?
+    `echo | set /p arg="${arg}"` :
+    `echo ${escapeShellArg(arg)}`;
+}
+
 export const setupOpBinary = async (
   binaryFolder: string,
 ): Promise<void> => {
@@ -54,7 +60,7 @@ export async function getSessionToken(
   binaryFolder: string
 ): Promise<Session> {
   const { domain, email, secretKey, masterPassword } = credentials;
-  const token = await exec(`signin ${domain} ${email} ${secretKey} --output=raw`, { before: `echo ${escapeShellArg(masterPassword)}`, raw: true, binaryFolder });
+  const token = await exec(`signin ${domain} ${email} ${secretKey} --output=raw`, { before: echo(masterPassword), raw: true, binaryFolder });
 
   return {
     token,
