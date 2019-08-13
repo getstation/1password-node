@@ -31,7 +31,7 @@ async function test() {
       },
     ]);
 
-  const session = await getSessionToken(credentials);
+  const session = await getSessionToken(credentials, './bin/op');
   console.log('session: ', session);
   console.log('---');
 

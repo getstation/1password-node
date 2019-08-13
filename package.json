@@ -1,6 +1,6 @@
 {
   "name": "1password-node",
-  "version": "2.1.6",
+  "version": "3.0.0-rc.4",
   "description": "",
   "keywords": [],
   "main": "dist/index.js",
@@ -14,16 +14,21 @@
   "author": "Hugo Mano <hugo@getstation.com>",
   "license": "MIT",
   "dependencies": {
+    "adm-zip": "^0.4.13",
     "bluebird": "^3.5.1",
+    "del": "^5.0.0",
+    "fs-extra": "^8.1.0",
     "fuse.js": "^3.2.0",
     "memoizee": "^0.4.11"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.4.32",
+    "@types/fs-extra": "^8.0.0",
     "@types/memoizee": "^0.4.2",
     "@types/node": "^9.4.0",
     "inquirer": "^5.1.0",
     "ts-node": "^4.1.0",
     "tslint-config-station": "^0.6.0",
-    "typescript": "^2.7.1"
+    "typescript": "^3.5.3"
   }
 }
